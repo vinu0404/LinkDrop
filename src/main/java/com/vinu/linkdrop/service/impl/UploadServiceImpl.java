@@ -1,6 +1,9 @@
 package com.vinu.linkdrop.service.impl;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.vinu.linkdrop.exceptionHandler.FileStorageException;
-import com.vinu.linkdrop.repository.FilesRepository;
 import com.vinu.linkdrop.service.interfaces.UploaderService;
 import com.vinu.linkdrop.utils.Util;
 import lombok.RequiredArgsConstructor;
@@ -10,39 +13,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class UploadServiceImpl implements UploaderService {
 
-    @Value("${files.data}")
-    private String DIR;
+    @Value("${backblaze.bucketName}")
+    private String bucketName;
 
-    private final FilesRepository filesRepository;
     private final RedisTemplate<String, String> redisTemplate;
-
-
+    private final AmazonS3 amazonS3;
 
     @Override
-    public String doUpload(MultipartFile file, Integer timeToLive){
-        String name = UUID.randomUUID().toString();
-        Path path = Paths.get(DIR, name + "_" + file.getOriginalFilename());
+    public String doUpload(MultipartFile file, Integer timeToLive) {
+        String fileKey = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
         try {
-            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            metadata.setContentType(file.getContentType());
+            PutObjectRequest putRequest = new PutObjectRequest(
+                    bucketName,
+                    fileKey,
+                    file.getInputStream(),
+                    metadata
+            );
+
+            amazonS3.putObject(putRequest);
+
         } catch (IOException e) {
-            throw new FileStorageException("Failed to store file");
+            throw new FileStorageException("Failed to store file in cloud storage: " + e.getMessage());
+        } catch (Exception e) {
+            throw new FileStorageException("Failed to upload to Backblaze B2: " + e.getMessage());
         }
         String code = Util.generateCode();
-        redisTemplate.opsForValue().set(code,path.toString(),
-                Duration.ofMinutes(Math.min(timeToLive,15)));
+        redisTemplate.opsForValue().set(
+                code,
+                fileKey,
+                Duration.ofMinutes(Math.min(timeToLive, 15))
+        );
+
         return code;
     }
 }
-

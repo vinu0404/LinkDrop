@@ -53,6 +53,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.565</version>
+		</dependency>
 
 		<!-- Validation (file size, empty file, invalid code) -->
 		<dependency>

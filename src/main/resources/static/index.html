@@ -1,60 +1,266 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LinkDrop - File Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkDrop - Secure File Sharing</title>
 
     <style>
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background:#f4f6f8;
-            text-align:center;
-            margin-top:40px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .box{
-            background:white;
-            padding:25px;
-            margin:20px auto;
-            width:420px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,0.15);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        h2{
-            margin-top:0;
+        .container {
+            max-width: 600px;
+            width: 100%;
         }
 
-        input, select, button{
-            margin:8px;
-            padding:10px;
-            width:80%;
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
         }
 
-        button{
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-            border-radius:5px;
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        button:hover{
-            background:#0056b3;
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
         }
 
-        #codeBox{
-            font-size:22px;
-            font-weight:bold;
-            color:#0b7a0b;
-            margin-top:10px;
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
 
-        #countdown{
-            font-size:18px;
-            color:#c0392b;
-            margin-top:8px;
+        .tabs {
+            display: flex;
+            background: #f8fafc;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .tab.active {
+            color: #6366f1;
+            background: white;
+            border-bottom: 3px solid #6366f1;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="file"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #6ee7b7;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fca5a5;
+        }
+
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 2px solid #93c5fd;
+        }
+
+        .loading {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fcd34d;
+        }
+
+        #codeBox {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #c4b5fd;
+        }
+
+        #codeBox.show {
+            display: block;
+        }
+
+        #codeBox .label {
+            color: #5b21b6;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #codeBox span {
+            display: block;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #6d28d9;
+            margin-top: 10px;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #countdown {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #dc2626;
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+            background: #fef2f2;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+
+            .tab-content {
+                padding: 30px 25px;
+            }
+
+            .tab {
+                font-size: 1em;
+                padding: 15px;
+            }
         }
     </style>
 
@@ -62,84 +268,143 @@
 
 <body>
 
-<h1>📂 LinkDrop File Sharing</h1>
+<div class="container">
+    <header>
+        <h1>LinkDrop</h1>
+        <p>Secure temporary file sharing</p>
+    </header>
 
-<!-- Upload Section -->
+    <div class="card">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('upload')">Upload File</button>
+            <button class="tab" onclick="switchTab('receive')">Receive File</button>
+        </div>
 
-<div class="box">
-    <h2>Upload File</h2>
+        <!-- Upload File Tab -->
+        <div id="upload" class="tab-content active">
+            <div class="form-group">
+                <label for="fileInput">Select File</label>
+                <input type="file" id="fileInput">
+            </div>
 
-    ```
-    <input type="file" id="fileInput"><br>
+            <div class="form-group">
+                <label for="ttl">Expiry Time</label>
+                <select id="ttl">
+                    <option value="1">1 Minute</option>
+                    <option value="2">2 Minutes</option>
+                    <option value="5">5 Minutes</option>
+                    <option value="10">10 Minutes</option>
+                    <option value="15">15 Minutes</option>
+                </select>
+            </div>
 
-    <label>Expiry Time:</label><br>
-    <select id="ttl">
-        <option value="1">1 Minute</option>
-        <option value="2">2 Minutes</option>
-        <option value="5">5 Minutes</option>
-        <option value="10">10 Minutes</option>
-        <option value="15">15 Minutes</option>
-    </select><br>
+            <button id="uploadBtn" onclick="uploadFile()">Upload to Cloud</button>
 
-    <button onclick="uploadFile()">Upload</button>
+            <div id="uploadStatus"></div>
+            <div id="codeBox"></div>
+            <div id="countdown"></div>
+        </div>
 
-    <div id="codeBox"></div>
-    <div id="countdown"></div>
-    ```
+        <!-- Receive File Tab -->
+        <div id="receive" class="tab-content">
+            <div class="form-group">
+                <label for="downloadCode">Enter Share Code</label>
+                <input type="text" id="downloadCode" placeholder="Enter 6-character code" maxlength="6">
+            </div>
 
-</div>
+            <button id="downloadBtn" onclick="downloadFile()">Download File</button>
 
-<!-- Download Section -->
-
-<div class="box">
-    <h2>Download File</h2>
-
-    ```
-    <input type="text" id="downloadCode" placeholder="Enter share code"><br>
-    <button onclick="downloadFile()">Download</button>
-
-    <p id="downloadStatus"></p>
-    ```
-
+            <div id="downloadStatus"></div>
+        </div>
+    </div>
 </div>
 
 <script>
 
     let timerInterval;
 
-    // Upload file
+    // Switch between tabs
+    function switchTab(tabName) {
+        // Remove active class from all tabs and contents
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // Add active class to selected tab and content
+        document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+
+        // Clear any status messages when switching tabs
+        if(tabName === 'upload') {
+            document.getElementById('uploadStatus').innerHTML = '';
+            document.getElementById('codeBox').innerHTML = '';
+            document.getElementById('codeBox').classList.remove('show');
+            document.getElementById('countdown').innerHTML = '';
+            clearInterval(timerInterval);
+        } else {
+            document.getElementById('downloadStatus').innerHTML = '';
+        }
+    }
+
+    // Upload file to Backblaze B2 via backend
     async function uploadFile(){
 
         const fileInput = document.getElementById("fileInput");
         const ttl = document.getElementById("ttl").value;
+        const uploadBtn = document.getElementById("uploadBtn");
+        const uploadStatus = document.getElementById("uploadStatus");
+        const codeBox = document.getElementById("codeBox");
+
+        // Clear previous results
+        uploadStatus.innerHTML = "";
+        codeBox.innerHTML = "";
+        codeBox.classList.remove('show');
+        clearInterval(timerInterval);
+        document.getElementById("countdown").innerHTML = "";
 
         if(fileInput.files.length === 0){
-            alert("Please select a file");
+            uploadStatus.innerHTML = '<div class="status-message error">Please select a file</div>';
             return;
         }
+
+        // Disable button and show loading
+        uploadBtn.disabled = true;
+        uploadStatus.innerHTML = '<div class="status-message loading">Uploading to cloud storage...</div>';
 
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
         formData.append("ttl", ttl);
 
-        const response = await fetch("http://localhost:8080/api/v1/files/upload",{
-            method:"POST",
-            body:formData
-        });
+        try {
+            const response = await fetch("http://localhost:8080/api/v1/files/upload", {
+                method: "POST",
+                body: formData
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        if(data.status !== "SUCCESS"){
-            alert(data.message);
-            return;
+            if(data.status !== "SUCCESS"){
+                uploadStatus.innerHTML = '<div class="status-message error">' + data.message + '</div>';
+                uploadBtn.disabled = false;
+                return;
+            }
+
+            const code = data.data;
+
+            uploadStatus.innerHTML = '<div class="status-message success">File uploaded successfully!</div>';
+            codeBox.innerHTML =
+                '<div class="label">Your Share Code</div><span>' + code + '</span>';
+            codeBox.classList.add('show');
+
+            startCountdown(ttl * 60);
+
+            // Clear file input
+            fileInput.value = "";
+
+        } catch(error) {
+            uploadStatus.innerHTML = '<div class="status-message error">Upload failed: ' + error.message + '</div>';
+        } finally {
+            uploadBtn.disabled = false;
         }
-
-        const code = data.data;
-
-        document.getElementById("codeBox").innerHTML =
-            "Your Code: <br><span style='font-size:28px'>" + code + "</span>";
-
-        startCountdown(ttl * 60);
     }
 
     // Countdown Timer
@@ -161,24 +426,41 @@
 
             if(seconds < 0){
                 clearInterval(timerInterval);
-                countdownEl.innerHTML = "Link expired!";
+                countdownEl.innerHTML = "Link expired";
             }
 
-        },1000);
+        }, 1000);
     }
 
-    // Download file
+    // Download file from Backblaze B2 via backend
     function downloadFile(){
         const code = document.getElementById("downloadCode").value.trim();
+        const downloadStatus = document.getElementById("downloadStatus");
+
+        downloadStatus.innerHTML = "";
 
         if(!code){
-            alert("Enter code");
+            downloadStatus.innerHTML = '<div class="status-message error">Please enter a share code</div>';
             return;
         }
 
-        window.location.href =
-            "http://localhost:8080/api/v1/files/download/" + code;
+        downloadStatus.innerHTML = '<div class="status-message info">Retrieving from cloud storage...</div>';
+
+        // Trigger download
+        window.location.href = "http://localhost:8080/api/v1/files/download/" + code;
+
+        // Clear the status after a delay (download should have started)
+        setTimeout(() => {
+            downloadStatus.innerHTML = "";
+        }, 2000);
     }
+
+    // Allow Enter key to trigger download
+    document.getElementById("downloadCode").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            downloadFile();
+        }
+    });
 
 </script>
 
