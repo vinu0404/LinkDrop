@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinkDrop - File Share</title>
+
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f4f6f8;
+            text-align:center;
+            margin-top:40px;
+        }
+
+        .box{
+            background:white;
+            padding:25px;
+            margin:20px auto;
+            width:420px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,0.15);
+        }
+
+        h2{
+            margin-top:0;
+        }
+
+        input, select, button{
+            margin:8px;
+            padding:10px;
+            width:80%;
+        }
+
+        button{
+            background:#007bff;
+            color:white;
+            border:none;
+            cursor:pointer;
+            border-radius:5px;
+        }
+
+        button:hover{
+            background:#0056b3;
+        }
+
+        #codeBox{
+            font-size:22px;
+            font-weight:bold;
+            color:#0b7a0b;
+            margin-top:10px;
+        }
+
+        #countdown{
+            font-size:18px;
+            color:#c0392b;
+            margin-top:8px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h1>📂 LinkDrop File Sharing</h1>
+
+<!-- Upload Section -->
+
+<div class="box">
+    <h2>Upload File</h2>
+
+    ```
+    <input type="file" id="fileInput"><br>
+
+    <label>Expiry Time:</label><br>
+    <select id="ttl">
+        <option value="1">1 Minute</option>
+        <option value="2">2 Minutes</option>
+        <option value="5">5 Minutes</option>
+        <option value="10">10 Minutes</option>
+        <option value="15">15 Minutes</option>
+    </select><br>
+
+    <button onclick="uploadFile()">Upload</button>
+
+    <div id="codeBox"></div>
+    <div id="countdown"></div>
+    ```
+
+</div>
+
+<!-- Download Section -->
+
+<div class="box">
+    <h2>Download File</h2>
+
+    ```
+    <input type="text" id="downloadCode" placeholder="Enter share code"><br>
+    <button onclick="downloadFile()">Download</button>
+
+    <p id="downloadStatus"></p>
+    ```
+
+</div>
+
+<script>
+
+    let timerInterval;
+
+    // Upload file
+    async function uploadFile(){
+
+        const fileInput = document.getElementById("fileInput");
+        const ttl = document.getElementById("ttl").value;
+
+        if(fileInput.files.length === 0){
+            alert("Please select a file");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("ttl", ttl);
+
+        const response = await fetch("http://localhost:8080/api/v1/files/upload",{
+            method:"POST",
+            body:formData
+        });
+
+        const data = await response.json();
+
+        if(data.status !== "SUCCESS"){
+            alert(data.message);
+            return;
+        }
+
+        const code = data.data;
+
+        document.getElementById("codeBox").innerHTML =
+            "Your Code: <br><span style='font-size:28px'>" + code + "</span>";
+
+        startCountdown(ttl * 60);
+    }
+
+    // Countdown Timer
+    function startCountdown(seconds){
+
+        clearInterval(timerInterval);
+
+        const countdownEl = document.getElementById("countdown");
+
+        timerInterval = setInterval(() => {
+
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+
+            countdownEl.innerHTML =
+                "Link expires in: " + min + "m " + sec + "s";
+
+            seconds--;
+
+            if(seconds < 0){
+                clearInterval(timerInterval);
+                countdownEl.innerHTML = "Link expired!";
+            }
+
+        },1000);
+    }
+
+    // Download file
+    function downloadFile(){
+        const code = document.getElementById("downloadCode").value.trim();
+
+        if(!code){
+            alert("Enter code");
+            return;
+        }
+
+        window.location.href =
+            "http://localhost:8080/api/v1/files/download/" + code;
+    }
+
+</script>
+
+</body>
+</html>
