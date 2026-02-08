@@ -1,1 +1,0 @@
-![recieve.png](../../../../images/recieve.png)![uplaod.png](../../../../images/uplaod.png)
