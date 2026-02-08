@@ -1,12 +1,8 @@
 package com.vinu.linkdrop.service.interfaces;
 
+import java.io.InputStream;
 
-import org.springframework.stereotype.Service;
-
-import java.nio.file.Path;
-
-@Service
 public interface DownloadService {
-
-    Path resolveFile(String code);
+    InputStream resolveFile(String code);
+    String getFileName(String code);
 }
